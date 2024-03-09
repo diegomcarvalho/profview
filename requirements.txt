@@ -2,3 +2,4 @@ calendar-view @ git+https://github.com/diegomcarvalho/calendar-view.git@bd35d0f2
 pandas==2.1.2
 numpy==1.26.1
 streamlit==1.28.0
+openpyxl
