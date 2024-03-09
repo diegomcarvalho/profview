@@ -162,7 +162,7 @@ def main():
     st.header("Relatório de Horários")
     st.subheader("Departamento de Ensino Superior - Cefet/RJ")
 
-    df = file_uploader("Choose a file", preprocess_pandas)
+    df = file_uploader("Escolha o arquivo", preprocess_pandas)
 
     if df is None:
         st.stop()
@@ -233,7 +233,7 @@ def main():
 
     config = CalendarConfig(
         lang="pt",
-        title=f"Grade Horária de {name}",
+        title=f"Grade Horária - {name}",
         dates="Seg - Sab" if aula_sabado else "Seg - Sex",
         hours="6 - 22",
         show_date=False,
@@ -246,9 +246,9 @@ def main():
         data.validate_events(events, config)
         calendar = Calendar.build(config)
         calendar.add_events(events)
-        calendar.save("gfis.png")
+        calendar.save("calendario.png")
 
-        st.image("gfis.png")
+        st.image("calendario.png")
 
         for od in nt_events:
             st.write(od)
@@ -257,16 +257,6 @@ def main():
 
     with st.expander("Resultado da seleção"):
         df[cond]
-
-    with st.expander("Resultado do cálculo de tempo"):
-        horas_aula
-        prof = list()
-        minut = list()
-        for k, v in horas_em_sala.items():
-            prof.append(k)
-            minut.append(v[1])
-        hs = pd.DataFrame({"NOME_DOCENTE": prof, "MINUTOS": minut})
-        hs.to_csv("DATA/HS.csv")
 
 
 if __name__ == "__main__":
