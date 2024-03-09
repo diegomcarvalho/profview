@@ -160,7 +160,7 @@ def calculate_horas_aula(df):
 def main():
     st_init()
     st.header("Relatório de Horários")
-    st.subheader("Departamento de Ensino Superior - Cefet/RJ")
+    st.subheader("Departamento de Educação Superior - Cefet/RJ")
 
     df = file_uploader("Escolha o arquivo", preprocess_pandas)
 
