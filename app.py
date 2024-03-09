@@ -157,8 +157,7 @@ def calculate_horas_aula(df):
     return horas_em_sala
 
 
-def main():
-    st_init()
+def professor():
     st.header("Relatório de Horários")
     st.subheader("Departamento de Educação Superior - Cefet/RJ")
 
@@ -257,6 +256,129 @@ def main():
 
     with st.expander("Resultado da seleção"):
         df[cond]
+
+
+def sala():
+    st.header("Relatório de Horários")
+    st.subheader("Departamento de Educação Superior - Cefet/RJ")
+
+    df = file_uploader("Choose a file", preprocess_pandas)
+
+    if df is None:
+        st.stop()
+
+    horas_aula = calculate_horas_aula(df)
+
+    name = st.sidebar.selectbox("Sala", sorted(df.NUM_SALA.unique()), key="name")
+
+    horas_em_sala = calculate_horas_aula(df)
+
+    cond = df.NUM_SALA.str.contains(st.session_state.name.upper())
+
+    selection = df[cond]
+    curso_disciplina = selection.COD_CURSO.unique()
+    nome_sala = selection.NUM_SALA.unique()[0]
+    num_turmas = len(selection.COD_TURMA.unique())
+    num_disciplinas = len(selection.COD_DISCIPLINA.unique())
+
+    st.divider()
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write(f"Curso: {curso_disciplina}")
+        st.write(f"Nome: {nome_sala}")
+    with col2:
+        st.write(f"Qnt disciplinas: {num_disciplinas}")
+        st.write(f"Qnt turmas: {num_turmas}")
+        # NOME_DOCENTE = df.NOME_DOCENTE.str.contains(
+        #     st.session_state.name.upper()).unique()[0]
+        try:
+            horas_aula = float(horas_em_sala[nome_sala][1]) / 50
+            st.write(
+                f"Horas em sala: {horas_em_sala[nome_sala][0]}h ({horas_aula} tempos)"
+            )
+        except:
+            st.write(f"Horas em sala: sem informação")
+
+    st.markdown("---")
+
+    aula_sabado = False
+
+    nt_events = list()
+    events = list()
+    conjunto_de_sobreposicao = set()
+    for _, row in df[cond].iterrows():
+        cod_d_t = f"{row['COD_DISCIPLINA']}-{row['COD_TURMA']}"
+        hr_inicio = str(row["HR_INICIO"])
+        hr_fim = str(row["HR_FIM"])
+        dow = int(row["ITEM_TABELA"]) - 2
+        sob_key = f"{row['COD_DISCIPLINA']}-{hr_inicio}-{hr_fim}"
+        if not sob_key in conjunto_de_sobreposicao:
+            conjunto_de_sobreposicao.add(sob_key)
+            if dow >= 0:
+                events.append(
+                    Event(
+                        day_of_week=dow,
+                        start=hr_inicio[0:5],
+                        end=hr_fim[0:5],
+                        title=cod_d_t,
+                        notes=f"{row['NOME_DISCIPLINA']}, {row['NOME_DOCENTE']}, {hr_inicio}-{hr_fim}",
+                        style=EventStyles.GREEN,
+                    ),
+                )
+                if dow == 6:
+                    aula_sabado = True
+            else:
+                nt_events.append(
+                    f"{row['COD_DISCIPLINA']}: {row['COD_TURMA']} : {row['NOME_DISCIPLINA']} - {row['NUM_SALA']} - {row['VAGAS_OCUPADAS']}"
+                )
+
+    config = CalendarConfig(
+        lang="pt",
+        title=f"Grade Horária de {name}",
+        dates="Seg - Sab" if aula_sabado else "Seg - Sex",
+        hours="6 - 22",
+        show_date=False,
+        legend=False,
+        title_vertical_align="top",
+    )
+
+    try:
+        data.validate_config(config)
+        data.validate_events(events, config)
+        calendar = Calendar.build(config)
+        calendar.add_events(events)
+        calendar.save("sala.png")
+        st.image("sala.png")
+
+        for od in nt_events:
+            st.write(od)
+    except:
+        pass
+
+    with st.expander("Resultado da seleção"):
+        df[cond]
+
+    with st.expander("Professores que usam a Sala"):
+        df.loc[cond, "NOME_DOCENTE"]
+
+
+def intro():
+    st.header("Relatório de Horários")
+    st.subheader("Departamento de Educação Superior - Cefet/RJ")
+
+
+def main():
+    st_init()
+    page_names_to_funcs = {
+        "—": intro,
+        "Professor": professor,
+        "Sala": sala,
+    }
+    demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
+    page_names_to_funcs[demo_name]()
+
+    return
 
 
 if __name__ == "__main__":
