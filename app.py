@@ -18,6 +18,7 @@ from calendar_view.core.event import EventStyles
 from typing import Callable
 import os
 
+df = None
 
 style.hour_height = 100
 
@@ -166,7 +167,7 @@ def professor():
     if df is None:
         st.stop()
 
-    horas_aula = calculate_horas_aula(df)
+    # horas_aula = calculate_horas_aula(df)
 
     name = st.sidebar.selectbox(
         "Nome do Professor", sorted(df.NOME_DOCENTE.unique()), key="name"
@@ -191,8 +192,7 @@ def professor():
     with col2:
         st.write(f"Qnt disciplinas: {num_disciplinas}")
         st.write(f"Qnt turmas: {num_turmas}")
-        # NOME_DOCENTE = df.NOME_DOCENTE.str.contains(
-        #     st.session_state.name.upper()).unique()[0]
+
         try:
             horas_aula = float(horas_em_sala[nome_professor][1]) / 50
             st.write(
@@ -262,12 +262,12 @@ def sala():
     st.header("Relatório de Horários")
     st.subheader("Departamento de Educação Superior - Cefet/RJ")
 
-    df = file_uploader("Choose a file", preprocess_pandas)
+    df = file_uploader("Escolha o arquivo", preprocess_pandas)
 
     if df is None:
         st.stop()
 
-    horas_aula = calculate_horas_aula(df)
+    # horas_aula = calculate_horas_aula(df)
 
     name = st.sidebar.selectbox("Sala", sorted(df.NUM_SALA.unique()), key="name")
 
@@ -290,8 +290,7 @@ def sala():
     with col2:
         st.write(f"Qnt disciplinas: {num_disciplinas}")
         st.write(f"Qnt turmas: {num_turmas}")
-        # NOME_DOCENTE = df.NOME_DOCENTE.str.contains(
-        #     st.session_state.name.upper()).unique()[0]
+
         try:
             horas_aula = float(horas_em_sala[nome_sala][1]) / 50
             st.write(
@@ -375,7 +374,7 @@ def main():
         "Professor": professor,
         "Sala": sala,
     }
-    demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
+    demo_name = st.sidebar.selectbox("Escolha a visão", page_names_to_funcs.keys())
     page_names_to_funcs[demo_name]()
 
     return
